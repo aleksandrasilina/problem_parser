@@ -15,6 +15,7 @@ class Problem(Base):
     __tablename__ = "problems"
 
     problem_id: Mapped[str] = mapped_column(String(10), primary_key=True)
+    contest_id: Mapped[Optional[int]]
     name: Mapped[str] = mapped_column(String(100))
     rating: Mapped[Optional[int]]
     tags: Mapped[str] = mapped_column(ARRAY(String(100)))
@@ -33,9 +34,9 @@ class ProblemStatistics(Base):
     problem_id: Mapped[str] = mapped_column(
         String(10), ForeignKey("problems.problem_id"), primary_key=True
     )
-    solved_сount: Mapped[Optional[int]]
+    solved_count: Mapped[Optional[int]]
 
     def __repr__(self) -> str:
         """Возвращает строковое представление о статистике по задаче."""
 
-        return f"Количество решений: {self.solved_сount} (ID: {self.problem_id})"
+        return f"Количество решений: {self.solved_count} (ID: {self.problem_id})"
