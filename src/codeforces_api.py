@@ -25,13 +25,27 @@ class CodeforcesAPI:
             self.__problems = response["result"]["problems"]
             self.__problems_statistics = response["result"]["problemStatistics"]
         else:
-            print(f"Ошибка при загрузке информации о задачах: {response['comment']}")
+            raise Exception(
+                f"Ошибка при загрузке информации о задачах: {response['comment']}"
+            )
+
+    @property
+    def codeforces_api_url(self) -> str:
+        """Геттер для url codeforces.com API."""
+
+        return self.__codeforces_api_url
 
     @property
     def problems(self) -> list[dict]:
         """Геттер для списка задач из архива сайта."""
 
         return self.__problems
+
+    @property
+    def codeforces_api_method(self) -> str:
+        """Геттер для метода запроса."""
+
+        return self.__codeforces_api_method
 
     @property
     def problems_statistics(self) -> list[dict]:
