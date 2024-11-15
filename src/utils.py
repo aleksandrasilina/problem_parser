@@ -28,6 +28,8 @@ def translate_tag_to_en(rus_tag: list[str]) -> list[str]:
     for tag in TAGS:
         if tag[1] == rus_tag[0].lower():
             return [tag[0]]
+    else:
+        raise Exception("Такого тега нет.")
 
 
 def translate_tag_to_rus(en_tag: str) -> str:
@@ -36,3 +38,5 @@ def translate_tag_to_rus(en_tag: str) -> str:
     for tag in TAGS:
         if tag[0] == en_tag.lower():
             return tag[1]
+    else:
+        raise Exception("Такого тега нет.")
