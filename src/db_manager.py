@@ -1,5 +1,3 @@
-from random import choice
-
 import psycopg2
 
 from src.database import engine, session_factory
@@ -46,9 +44,9 @@ class DBManager:
                 problems_to_add.append(
                     Problem(
                         problem_id=str(problem.get("contestId")) + problem.get("index"),
+                        contest_id=problem.get("contestId"),
                         name=problem.get("name"),
                         rating=problem.get("rating"),
-                        # tags=[translate_tag_to_rus(tag) for tag in problem.get("tags")],
                         tags=problem.get("tags"),
                     )
                 )
@@ -89,19 +87,22 @@ class DBManager:
                 )
             )
             if query.count() > 0:
-                random_problem = choice(query.all())
+                problem = query.all()
 
                 return (
-                    f"ID: {random_problem[0].problem_id}\n"
-                    f"Название: {random_problem[0].name}\n"
-                    f"Сложность: {random_problem[0].rating}\n"
-                    f"Темы: {", ".join([translate_tag_to_rus(tag) for tag in random_problem[0].tags])}\n"
-                    f"Количество решений: {random_problem[1].solved_сount}"
+                    f"ID: {problem[0].problem_id}\n"
+                    f"Название: {problem[0].name}\n"
+                    f"Сложность: {problem[0].rating}\n"
+                    f"Темы: {", ".join([translate_tag_to_rus(tag) for tag in problem[0].tags])}\n"
+                    f"Количество решений: {problem[1].solved_сount}"
                 )
 
     @staticmethod
     def get_problems_selection(tag: list[str], rating: str) -> list[tuple[str, str]]:
-        """Получение списка из 10 задач, удовлетворяющих переданным пользователем теме и сложности."""
+        """
+        Получение списка из 10 задач, удовлетворяющих переданным пользователем теме и сложности.
+        При этом задачи не пересекаются между различными контестами.
+        """
 
         with session_factory() as session:
             en_tag = translate_tag_to_en(tag)
@@ -109,6 +110,7 @@ class DBManager:
                 session.query(Problem)
                 .filter(Problem.rating == rating)
                 .filter(Problem.tags.contains(en_tag))
+                .distinct(Problem.contest_id)
                 .limit(10)
             )
             problem_objects = query.all()
