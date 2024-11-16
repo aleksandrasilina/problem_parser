@@ -11,7 +11,7 @@ def get_inline_kb():
     inline_kb_list = [
         [
             InlineKeyboardButton(
-                text="Подобрать задачи", callback_data="get_problem_selection"
+                text="Подобрать задачи", callback_data="get_problems_selection"
             )
         ],
         [
@@ -23,7 +23,7 @@ def get_inline_kb():
     return InlineKeyboardMarkup(inline_keyboard=inline_kb_list)
 
 
-def get_rating_inline_kb():
+def get_rating_kb():
     """Инлайн кнопки для выбора сложности задачи."""
 
     builder = ReplyKeyboardBuilder()
@@ -34,7 +34,7 @@ def get_rating_inline_kb():
     return builder.as_markup(resize_keyboard=True)
 
 
-def get_tags_inline_kb():
+def get_tags_kb():
     """Инлайн кнопки для выбора темы задачи."""
 
     builder = ReplyKeyboardBuilder()
