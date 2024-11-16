@@ -5,9 +5,9 @@ import sys
 
 sys.path.insert(1, os.path.join(sys.path[0], ".."))
 
-from settings import db_name, host, password, port, user
 from src.codeforces_api import CodeforcesAPI
 from src.db_manager import DBManager
+from src.settings import db_name, host, password, port, user
 from src.tg_bot.tg_bot import run_bot
 
 
