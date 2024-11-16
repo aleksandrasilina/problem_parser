@@ -9,8 +9,7 @@ from aiogram.fsm.context import FSMContext
 from aiogram.fsm.state import State, StatesGroup
 from aiogram.types import CallbackQuery, Message
 
-from src.tg_bot.keyboards import (get_inline_kb, get_rating_inline_kb,
-                                  get_tags_inline_kb)
+from src.tg_bot.keyboards import get_inline_kb, get_rating_kb, get_tags_kb
 from src.utils import check_tag, extract_number
 
 sys.path.insert(1, os.path.join(sys.path[0], ".."))
@@ -42,7 +41,7 @@ async def command_start_handler(message: Message):
     )
 
 
-@dp.callback_query(F.data == "get_problem_selection")
+@dp.callback_query(F.data == "get_problems_selection")
 async def send_problems_selection(call: CallbackQuery, state: FSMContext):
     """
     Сохраняет состояние Form.rating.
@@ -50,12 +49,12 @@ async def send_problems_selection(call: CallbackQuery, state: FSMContext):
     """
 
     await state.set_state(Form.rating)
-    await call.answer()
+    # await call.answer()
     await call.message.answer(
         "Укажи желаемую сложность задачи.\n"
         "Сложность находится в диапазоне от 800 до 3500 и кратна 100.\n"
         "Например, 900, 1500, 1700.",
-        reply_markup=get_rating_inline_kb(),
+        reply_markup=get_rating_kb(),
     )
 
 
@@ -68,7 +67,6 @@ async def process_rating(message: Message, state: FSMContext):
     """
 
     check_rating = extract_number(message.text)
-
     if (
         not check_rating
         or not 800 <= check_rating <= 3500
@@ -82,9 +80,7 @@ async def process_rating(message: Message, state: FSMContext):
 
     await state.update_data(rating=message.text)
     await state.set_state(Form.tags)
-    await message.answer(
-        "Напиши желаемую тему задачи.", reply_markup=get_tags_inline_kb()
-    )
+    await message.answer("Напиши желаемую тему задачи.", reply_markup=get_tags_kb())
 
 
 @dp.message(Form.tags)
@@ -96,7 +92,7 @@ async def process_tags(message: Message, state: FSMContext):
 
     if not check_tag(message.text):
         await message.reply(
-            "Такой темы нет. Пожалуйста, введите корректную тему задачи.\n"
+            "Такой темы нет. Пожалуйста, введите корректную тему задачи."
         )
         return
 
@@ -107,14 +103,8 @@ async def process_tags(message: Message, state: FSMContext):
     )
 
     if problems_selection:
-        problems_to_send = [
-            f"{num + 1}. {problem[0]} (ID: {problem[1]})"
-            for num, problem in enumerate(problems_selection)
-        ]
-
         await message.answer(
-            f"Задачи, соответствующие выбранным параметрам:\n"
-            f"{"\n".join(problems_to_send)}",
+            f"Задачи, соответствующие выбранным параметрам:\n{problems_selection}",
             reply_markup=types.ReplyKeyboardRemove(),
         )
     else:
@@ -130,7 +120,7 @@ async def send_problem(call: CallbackQuery, state: FSMContext):
     """Сохраняет состояние Form.id. Запрашивает ID задачи."""
 
     await state.set_state(Form.id)
-    await call.answer()
+    # await call.answer()
     await call.message.answer("Укажи ID задачи.")
 
 
