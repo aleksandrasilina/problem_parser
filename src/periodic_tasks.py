@@ -1,4 +1,9 @@
+import os
+import sys
+
 from apscheduler.schedulers.blocking import BlockingScheduler
+
+sys.path.insert(1, os.path.join(sys.path[0], ".."))
 
 from src.codeforces_api import CodeforcesAPI
 from src.db_manager import DBManager
