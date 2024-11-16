@@ -1,4 +1,5 @@
 import psycopg2
+from sqlalchemy import delete, select
 
 from src.database import engine, session_factory
 from src.models import Base, Problem, ProblemStatistics
@@ -62,7 +63,7 @@ class DBManager:
                 ProblemStatistics(
                     problem_id=str(problem_statistics.get("contestId"))
                     + problem_statistics.get("index"),
-                    solved_сount=problem_statistics.get("solvedCount"),
+                    solved_count=problem_statistics.get("solvedCount"),
                 )
                 for problem_statistics in problems_statistics
             ]
@@ -86,19 +87,18 @@ class DBManager:
                     Problem.problem_id == ProblemStatistics.problem_id,
                 )
             )
-            if query.count() > 0:
-                problem = query.all()
-
+            problem = query.all()
+            if problem:
                 return (
-                    f"ID: {problem[0].problem_id}\n"
-                    f"Название: {problem[0].name}\n"
-                    f"Сложность: {problem[0].rating}\n"
-                    f"Темы: {", ".join([translate_tag_to_rus(tag) for tag in problem[0].tags])}\n"
-                    f"Количество решений: {problem[1].solved_сount}"
+                    f"ID: {problem[0][0].problem_id}\n"
+                    f"Название: {problem[0][0].name}\n"
+                    f"Сложность: {problem[0][0].rating}\n"
+                    f"Темы: {", ".join([translate_tag_to_rus(tag) for tag in problem[0][0].tags])}\n"
+                    f"Количество решений: {problem[0][1].solved_count}"
                 )
 
     @staticmethod
-    def get_problems_selection(tag: list[str], rating: str) -> list[tuple[str, str]]:
+    def get_problems_selection(tag: list[str], rating: str) -> str:
         """
         Получение списка из 10 задач, удовлетворяющих переданным пользователем теме и сложности.
         При этом задачи не пересекаются между различными контестами.
@@ -114,4 +114,39 @@ class DBManager:
                 .limit(10)
             )
             problem_objects = query.all()
-            return [(problem.name, problem.problem_id) for problem in problem_objects]
+            if problem_objects:
+                return "\n".join(
+                    [
+                        f"{num + 1}. {problem.name} (ID: {problem.problem_id})"
+                        for num, problem in enumerate(problem_objects)
+                    ]
+                )
+
+    @staticmethod
+    def list_problems():
+        """Вывод всех задач из таблицы problems."""
+
+        query = select(Problem)
+        with session_factory() as session:
+            problems = session.execute(query)
+            session.commit()
+            return problems.all()
+
+    @staticmethod
+    def list_problems_statistics():
+        """Вывод всех задач из таблицы problems_statistics."""
+
+        query = select(ProblemStatistics)
+        with session_factory() as session:
+            problems_statistics = session.execute(query)
+            session.commit()
+            return problems_statistics.all()
+
+    @staticmethod
+    def delete_all():
+        """Удаление всех данных из таблиц problems и problems_statistics."""
+
+        with session_factory() as session:
+            session.execute(delete(ProblemStatistics))
+            session.execute(delete(Problem))
+            session.commit()
