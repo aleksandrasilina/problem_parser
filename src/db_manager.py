@@ -73,10 +73,7 @@ class DBManager:
 
     @staticmethod
     def find_problem(entered_id: str) -> str:
-        """
-        Поиск задачи по переданным пользователем ключевым словам.
-        Если задач несколько, то возвращает информацию по случайной задаче.
-        """
+        """Получение информации о задаче по ID."""
 
         with session_factory() as session:
             query = (
